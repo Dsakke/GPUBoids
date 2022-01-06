@@ -1,14 +1,149 @@
 // Each #kernel tells which function to compile; you can have many kernels
 #pragma kernel CSMain
-
-// Create a RenderTexture with enableRandomWrite flag and set it
-// with cs.SetTexture
-RWTexture2D<float4> Result;
-
-[numthreads(8,8,1)]
-void CSMain (uint3 id : SV_DispatchThreadID)
+#pragma enable_d3d11_debug_symbols
+struct Boid
 {
-    // TODO: insert actual code here!
+	float3 position;
+	float3 velocity;
+};
 
-    Result[id.xy] = float4(id.x & id.y, (id.x & 15)/15.0, (id.y & 15)/15.0, 0.0);
+static const int threadGroupsSize = 100;
+static const int g_MaxNeighbors = 100;
+
+
+RWStructuredBuffer<Boid> g_Boids;
+float g_WorldSize;
+float g_NeighborhoodRad;
+int g_NrBoids;
+float g_Acceleration;
+float g_MaxSpeed;
+
+float3 Seek(float3 target, Boid boid)
+{
+	float3 vel = target - boid.position;
+	vel = normalize(vel);
+	return vel;
 }
+
+float3 Cohesion(int neighbors[g_MaxNeighbors], int nrNeighbors, Boid boid)
+{
+	float3 averagePos = (float3) 0;
+    if(nrNeighbors == 0)
+    {
+        return averagePos;
+    }
+	for (int i = 0; i < nrNeighbors; i++)
+	{
+		averagePos += g_Boids[neighbors[i]].position;
+	}
+	averagePos /= nrNeighbors;
+	
+	return -Seek(averagePos, boid);
+}
+
+
+float3 Seperation(int neighbors[g_MaxNeighbors], int nrNeighbors, Boid boid)
+{
+	float3 vel = (float3)0;
+    if (nrNeighbors == 0)
+    {
+        return vel;
+    }
+	for (int i = 0; i < nrNeighbors; i++)
+	{
+		float3 vecFromNeighbor = boid.position - g_Boids[neighbors[i]].position;
+		float multiplier = 1 - (length(vecFromNeighbor) / g_NeighborhoodRad);
+		vel += normalize(vecFromNeighbor) * multiplier;
+	}
+	vel /= nrNeighbors;
+	vel = normalize(vel);
+	return vel;
+}
+
+float3 Alignment(int neighbors[g_MaxNeighbors], int nrNeighbors, Boid boid)
+{
+	float3 averageVel = (float3) 0;
+    if (nrNeighbors == 0)
+    {
+        return averageVel;
+    }
+	for (int i = 0; i < nrNeighbors; i++)
+	{
+		averageVel = g_Boids[neighbors[i]].velocity;
+	}
+    if(length(averageVel) == 0)
+    {
+        return (float3) 0;
+    }
+	averageVel /= nrNeighbors;
+    averageVel = normalize(averageVel);
+	return averageVel;
+}
+
+
+[numthreads(threadGroupsSize, 1, 1)]
+void CSMain(uint3 id : SV_DispatchThreadID)
+{
+    float3 pos = g_Boids[id.x].position;
+    float3 vel = g_Boids[id.x].velocity;
+	
+	//register neighbors
+    int nrNeighbors = 0;
+    int neighbors[g_MaxNeighbors];
+    for (int idx = 0; idx < g_NrBoids; ++idx)
+    {
+        if ((uint) idx == id.x)
+            continue;
+        
+        float3 otherPos = g_Boids[idx].position;
+        if (length(pos - otherPos) < g_NeighborhoodRad) // inneficient neighbor registration, do spatial partitioning when time left
+        {
+            neighbors[nrNeighbors++] = idx;
+        }
+    }
+	
+	//calculate steering
+	//TODO make the steeringbehaviours weighted
+    float3 steeringOutput = Cohesion(neighbors, nrNeighbors, g_Boids[id.x]) + Seperation(neighbors, nrNeighbors, g_Boids[id.x]) + Alignment(neighbors, nrNeighbors, g_Boids[id.x]);
+    if(length(steeringOutput) != 0)
+    {
+        steeringOutput = normalize(steeringOutput);
+        steeringOutput *= g_Acceleration;        
+    }
+    g_Boids[id.x].velocity += steeringOutput;
+    if (length(g_Boids[id.x].velocity) > g_MaxSpeed)
+    {
+        g_Boids[id.x].velocity = normalize(g_Boids[id.x].velocity) * g_MaxSpeed;
+    }
+    g_Boids[id.x].position += g_Boids[id.x].velocity;
+	
+	
+	// Keep boids in world, if the move out they get teleported to the other side
+    if (g_Boids[id.x].position.x > g_WorldSize)
+    {
+        g_Boids[id.x].position.x = -g_WorldSize;
+    }
+    else if (g_Boids[id.x].position.x < -g_WorldSize)
+    {
+        g_Boids[id.x].position.x = g_WorldSize;
+    }
+	
+    if (g_Boids[id.x].position.y > g_WorldSize)
+    {
+        g_Boids[id.x].position.y = -g_WorldSize;
+    }
+    else if (g_Boids[id.x].position.y < -g_WorldSize)
+    {
+        g_Boids[id.x].position.y = g_WorldSize;
+    }
+    
+    if (g_Boids[id.x].position.z > g_WorldSize)
+    {
+        g_Boids[id.x].position.z = -g_WorldSize;
+    }
+    else if (g_Boids[id.x].position.z < -g_WorldSize)
+    {
+        g_Boids[id.x].position.z = g_WorldSize;
+    }
+}
+
