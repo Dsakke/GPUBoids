@@ -26,7 +26,6 @@ public class Flock : MonoBehaviour
     private int m_NrBoids = 100;
     private ComputeBuffer m_Buffer;
     private Boid[] m_BoidData;
-    private Boid[] m_OriginalData;
     [SerializeField]
     private float m_WorldSize = 1000.0f;
     [SerializeField]
@@ -36,6 +35,15 @@ public class Flock : MonoBehaviour
     private float m_Acceleration = 10.0f;
     [SerializeField]
     private float m_MaxSpeed = 50.0f;
+    [SerializeField]
+    [Range(0.0f, 1.0f)]
+    private float m_Cohesion = 0.5f;
+    [SerializeField]
+    [Range(0.0f, 1.0f)]
+    private float m_Allignment = 0.5f;
+    [SerializeField]
+    [Range(0.0f, 1.0f)]
+    private float m_Seperation = 0.5f;
     private List<Transform> m_BoidTransforms = new List<Transform>();
 
     // Start is called before the first frame update
@@ -49,13 +57,10 @@ public class Flock : MonoBehaviour
             m_BoidTransforms.Add(newBoid.transform);
         }
         UpdateBoids();
-        m_OriginalData = m_BoidData;
         int posVecSize = sizeof(float) * 3;
         int velocityVecSize = sizeof(float) * 3;
         int boidSize = posVecSize + velocityVecSize;
         m_Buffer = new ComputeBuffer(m_NrBoids, boidSize);
-        //m_Buffer = new ComputeBuffer(m_NrBoids, boidSize, ComputeBufferType.Default, ComputeBufferMode.Dynamic);
-        //m_Buffer.SetData(m_BoidData);
     }
 
     // Update is called once per frame
@@ -77,12 +82,13 @@ public class Flock : MonoBehaviour
         for(int i = 0; i < m_NrBoids; i++)
         {
             m_BoidTransforms[i].position = m_BoidData[i].position;
+            m_BoidTransforms[i].forward = m_BoidData[i].velocity;
         }
     }
 
     void SetComputeShaderInput()
     {
-        m_Buffer.SetData(m_OriginalData);
+        m_Buffer.SetData(m_BoidData);
         int kernel = m_BoidCompute.FindKernel("CSMain");
         m_BoidCompute.SetBuffer(kernel, "g_Boids", m_Buffer);
         m_BoidCompute.SetFloat("g_WorldSize", m_WorldSize);
@@ -90,10 +96,13 @@ public class Flock : MonoBehaviour
         m_BoidCompute.SetFloat("g_Acceleration", m_Acceleration);
         m_BoidCompute.SetFloat("g_MaxSpeed", m_MaxSpeed);
         m_BoidCompute.SetInt("g_NrBoids", m_NrBoids);
+        m_BoidCompute.SetFloat("g_Seperation", m_Seperation);
+        m_BoidCompute.SetFloat("g_Cohesion", m_Cohesion);
+        m_BoidCompute.SetFloat("g_Allignment", m_Allignment);
     }
 
     private void ondestroy()
     {
-        m_Buffer.Release();
+        m_Buffer.Dispose();
     }
 }

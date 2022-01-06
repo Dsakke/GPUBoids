@@ -246,12 +246,15 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_BoidCompute: {fileID: 7200000, guid: 6c1378283687063459138a690a31ab6a, type: 3}
+  m_BoidObject: {fileID: 1767946990722108971, guid: ba66b7f194a56a146b7cc732fd9331dc, type: 3}
   m_NrBoids: 10000
   m_WorldSize: 1000
   m_NeighborhoodRadius: 100
   m_Acceleration: 0.1
   m_MaxSpeed: 1
-  m_BoidObject: {fileID: 1767946990722108971, guid: ba66b7f194a56a146b7cc732fd9331dc, type: 3}
+  m_Cohesion: 0.5
+  m_Allignment: 0.5
+  m_Seperation: 0.5
 --- !u!4 &713904716
 Transform:
   m_ObjectHideFlags: 0

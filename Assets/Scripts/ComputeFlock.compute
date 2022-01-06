@@ -8,6 +8,8 @@ struct Boid
 };
 
 static const int threadGroupsSize = 100;
+// This is the easiest way to change the size of an array, because no dynamic arrays in hlsl :^)
+// If I go a lot of boids in small space might need to make this bigger
 static const int g_MaxNeighbors = 100;
 
 
@@ -17,6 +19,9 @@ float g_NeighborhoodRad;
 int g_NrBoids;
 float g_Acceleration;
 float g_MaxSpeed;
+float g_Seperation;
+float g_Cohesion;
+float g_Allignment;
 
 float3 Seek(float3 target, Boid boid)
 {
@@ -38,7 +43,7 @@ float3 Cohesion(int neighbors[g_MaxNeighbors], int nrNeighbors, Boid boid)
 	}
 	averagePos /= nrNeighbors;
 	
-	return -Seek(averagePos, boid);
+	return Seek(averagePos, boid);
 }
 
 
@@ -99,12 +104,16 @@ void CSMain(uint3 id : SV_DispatchThreadID)
         if (length(pos - otherPos) < g_NeighborhoodRad) // inneficient neighbor registration, do spatial partitioning when time left
         {
             neighbors[nrNeighbors++] = idx;
+            if(nrNeighbors >= g_MaxNeighbors - 1)
+            {
+                break;
+            }
         }
     }
 	
 	//calculate steering
-	//TODO make the steeringbehaviours weighted
-    float3 steeringOutput = Cohesion(neighbors, nrNeighbors, g_Boids[id.x]) + Seperation(neighbors, nrNeighbors, g_Boids[id.x]) + Alignment(neighbors, nrNeighbors, g_Boids[id.x]);
+	// I know this isn't super expandable but I don't know how to make a proper implementation with hlsl
+    float3 steeringOutput = g_Cohesion * Cohesion(neighbors, nrNeighbors, g_Boids[id.x]) + g_Seperation * Seperation(neighbors, nrNeighbors, g_Boids[id.x]) + g_Allignment * Alignment(neighbors, nrNeighbors, g_Boids[id.x]);
     if(length(steeringOutput) != 0)
     {
         steeringOutput = normalize(steeringOutput);
