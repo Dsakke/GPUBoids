@@ -21,7 +21,20 @@ float g_MaxSpeed;
 float g_Seperation;
 float g_Cohesion;
 float g_Allignment;
+float g_Wander;
+float g_WanderCubeSize;
+float g_WanderCubeDistance;
 
+// https://gamedev.stackexchange.com/questions/149137/pseudo-random-number-generation-in-compute-shader
+int3 RandomNumbers(uint3 id) // Not super great randomness but only really needs to look random
+{
+    int3 output = (float3) 0;
+    output.x = (int) (sin(id.x * 71.01) * 500461564);
+    output.y = (int) (cos(id.y * 53.7) * 1023467329);
+    output.z = (int) (sin(id.z * 98.23) * 500461564);
+    return output;
+
+}
 
 [numthreads(threadGroupsSize, 1, 1)]
 void CSMain(uint3 id : SV_DispatchThreadID)
@@ -45,16 +58,25 @@ void CSMain(uint3 id : SV_DispatchThreadID)
                 averageSeperation += (vecFromNeighbor / dist) * (1 - (dist / g_NeighborhoodRad));
         }
     }
+
+    // Wander Behaviour
+    uint3 randomNumbers = RandomNumbers(id);
+    float3 wanderPos = g_Boids[id.x].position;
+    wanderPos.x = ((randomNumbers.x % g_WanderCubeSize * 2) - g_WanderCubeSize) / g_WanderCubeSize;
+    wanderPos.y = ((randomNumbers.y % g_WanderCubeSize * 2) - g_WanderCubeSize) / g_WanderCubeSize;
+    wanderPos.z = ((randomNumbers.z % g_WanderCubeSize * 2) - g_WanderCubeSize) / g_WanderCubeSize;
+    float oriSpeed = length(g_Boids[id.x].velocity);
+    float3 wander = (float3) 0;
+    if(oriSpeed != 0)
+    {
+        wanderPos += g_Boids[id.x].position + (g_Boids[id.x].velocity / oriSpeed) * g_WanderCubeDistance;
+        wander = normalize(wanderPos - g_Boids[id.x].position) * g_Wander;
+    }
     
     averageAllignment /= nrNeighbors;
     averageCohesion /= nrNeighbors;
     float3 cohesion = averageCohesion - g_Boids[id.x].position;
     averageSeperation /= nrNeighbors;
-
-    if(nrNeighbors == 1) // if no neighbors boid does not move
-    {
-        return;
-    }
     
     float allingmentLength = length(averageAllignment);
     if (allingmentLength != 0)
@@ -63,10 +85,15 @@ void CSMain(uint3 id : SV_DispatchThreadID)
     cohesion = normalize(cohesion) * g_Cohesion;
     averageSeperation = normalize(averageSeperation) * g_Seperation;
     
-    float3 steering = averageAllignment + cohesion + averageSeperation;
+    float3 steering = averageAllignment + cohesion + averageSeperation + wander;
     float steeringLength = length(steering);
-    if(length(steering) != 0)
-        g_Boids[id.x].velocity = steering / steeringLength * g_MaxSpeed;
+    
+    g_Boids[id.x].velocity += steering / steeringLength * g_Acceleration;
+    float speed = length(g_Boids[id.x].velocity);
+    if(speed > g_MaxSpeed)
+    {
+        g_Boids[id.x].velocity = (g_Boids[id.x].velocity / speed) * g_MaxSpeed;
+    }
     g_Boids[id.x].position += g_Boids[id.x].velocity;
     
 	// Keep boids in world, if the move out they get teleported to the other side

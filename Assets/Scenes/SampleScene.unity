@@ -246,7 +246,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_BoidCompute: {fileID: 7200000, guid: 6c1378283687063459138a690a31ab6a, type: 3}
-  m_NrBoids: 25000
+  m_NrBoids: 10000
   m_WorldSize: 1000
   m_NeighborhoodRadius: 100
   m_Acceleration: 0.1
@@ -254,6 +254,9 @@ MonoBehaviour:
   m_Cohesion: 0.175
   m_Allignment: 0.2
   m_Seperation: 0.3
+  m_Wander: 0.2
+  m_WanderCubeSize: 5
+  m_WanderCubeDistance: 10
   m_BoidMesh: {fileID: 7450741763379908841, guid: d8a7b3ae292b16344b8d2fa319443e4c, type: 3}
   m_Material: {fileID: 2100000, guid: c4aa26f42bc30a84ab1c5af4e591a934, type: 2}
 --- !u!4 &713904716
@@ -320,7 +323,7 @@ Camera:
     width: 1
     height: 1
   near clip plane: 0.3
-  far clip plane: 1000
+  far clip plane: 10000
   field of view: 60
   orthographic: 0
   orthographic size: 5
@@ -347,7 +350,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 963194225}
   m_LocalRotation: {x: 0.2968016, y: -0, z: -0, w: 0.9549392}
-  m_LocalPosition: {x: 0, y: 397.6, z: -986.9}
+  m_LocalPosition: {x: 0, y: 1365, z: -1530.4}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 0}

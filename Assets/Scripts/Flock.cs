@@ -46,7 +46,13 @@ public class Flock : MonoBehaviour
     [SerializeField]
     [Range(0.0f, 1.0f)]
     private float m_Seperation = 0.162f;
-    private List<Transform> m_BoidTransforms = new List<Transform>();
+    [SerializeField]
+    [Range(0.0f, 1.0f)]
+    private float m_Wander = 0.2f;
+    [SerializeField]
+    private float m_WanderCubeSize = 5.0f;
+    [SerializeField]
+    private float m_WanderCubeDistance = 10.0f;
 
     // Instanced Draw Arguments
     [Header("Graphics Settings")]
@@ -115,6 +121,9 @@ public class Flock : MonoBehaviour
         m_BoidCompute.SetFloat("g_Seperation", m_Seperation);
         m_BoidCompute.SetFloat("g_Cohesion", m_Cohesion);
         m_BoidCompute.SetFloat("g_Allignment", m_Allignment);
+        m_BoidCompute.SetFloat("g_Wander", m_Wander);
+        m_BoidCompute.SetFloat("g_WanderCubeSize", m_WanderCubeSize);
+        m_BoidCompute.SetFloat("g_WanderCubeDistance", m_WanderCubeDistance);
     }
 
     private void OnDestroy()
