@@ -1,3 +1,32 @@
+Skip to content
+Search or jump to…
+Pull requests
+Issues
+Marketplace
+Explore
+ 
+@Dsakke 
+Dsakke
+/
+GPUBoids
+Public
+Code
+Issues
+Pull requests
+Actions
+Projects
+Wiki
+Security
+Insights
+Settings
+GPUBoids/.gitignore
+@Dsakke
+Dsakke Initiale Commit
+Latest commit e42ef6b on 3 Jan
+ History
+ 1 contributor
+482 lines (382 sloc)  8.33 KB
+  
 
 # Created by https://www.toptal.com/developers/gitignore/api/visualstudio,unity,windows
 # Edit at https://www.toptal.com/developers/gitignore?templates=visualstudio,unity,windows
@@ -480,3 +509,16 @@ FodyWeavers.xsd
 # Additional files built by Visual Studio
 
 # End of https://www.toptal.com/developers/gitignore/api/visualstudio,unity,windows
+© 2022 GitHub, Inc.
+Terms
+Privacy
+Security
+Status
+Docs
+Contact GitHub
+Pricing
+API
+Training
+Blog
+About
+Loading complete

@@ -1,11 +1,9 @@
 // Each #kernel tells which function to compile; you can have many kernels
 #pragma kernel CSMain
 #pragma enable_d3d11_debug_symbols
-struct Boid
-{
-	float3 position;
-	float3 velocity;
-};
+
+#include "Steering.cginc"
+
 
 static const int threadGroupsSize = 1024;
 
@@ -25,16 +23,7 @@ float g_Wander;
 float g_WanderCubeSize;
 float g_WanderCubeDistance;
 
-// https://gamedev.stackexchange.com/questions/149137/pseudo-random-number-generation-in-compute-shader
-int3 RandomNumbers(uint3 id) // Not super great randomness but only really needs to look random
-{
-    int3 output = (float3) 0;
-    output.x = (int) (sin(id.x * 71.01) * 500461564);
-    output.y = (int) (cos(id.y * 53.7) * 1023467329);
-    output.z = (int) (sin(id.z * 98.23) * 500461564);
-    return output;
 
-}
 
 [numthreads(threadGroupsSize, 1, 1)]
 void CSMain(uint3 id : SV_DispatchThreadID)
@@ -60,18 +49,9 @@ void CSMain(uint3 id : SV_DispatchThreadID)
     }
 
     // Wander Behaviour
-    uint3 randomNumbers = RandomNumbers(id);
-    float3 wanderPos = g_Boids[id.x].position;
-    wanderPos.x = ((randomNumbers.x % g_WanderCubeSize * 2) - g_WanderCubeSize) / g_WanderCubeSize;
-    wanderPos.y = ((randomNumbers.y % g_WanderCubeSize * 2) - g_WanderCubeSize) / g_WanderCubeSize;
-    wanderPos.z = ((randomNumbers.z % g_WanderCubeSize * 2) - g_WanderCubeSize) / g_WanderCubeSize;
-    float oriSpeed = length(g_Boids[id.x].velocity);
-    float3 wander = (float3) 0;
-    if(oriSpeed != 0)
-    {
-        wanderPos += g_Boids[id.x].position + (g_Boids[id.x].velocity / oriSpeed) * g_WanderCubeDistance;
-        wander = normalize(wanderPos - g_Boids[id.x].position) * g_Wander;
-    }
+    
+    float3 wander = Wander(g_Boids[id.x], g_WanderCubeSize, g_WanderCubeDistance, id) * g_Wander;
+    
     
     averageAllignment /= nrNeighbors;
     averageCohesion /= nrNeighbors;

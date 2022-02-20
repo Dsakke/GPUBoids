@@ -37,7 +37,7 @@ Shader "Instanced/InstancedSurfaceShader" {
                 float3 up = cross(g_Boids[unity_InstanceID].velocity, right);
                 unity_ObjectToWorld._11_21_31_41 = float4(normalize(right), 0);
                 unity_ObjectToWorld._12_22_32_42 = float4(normalize(up), 0);
-                unity_ObjectToWorld._13_23_33_43 = float4(g_Boids[unity_InstanceID].velocity, 0);
+                unity_ObjectToWorld._13_23_33_43 = float4(normalize(g_Boids[unity_InstanceID].velocity), 0);
                 unity_ObjectToWorld._14_24_34_44 = float4(g_Boids[unity_InstanceID].position.xyz, 1);
 
                 unity_WorldToObject = unity_ObjectToWorld;
