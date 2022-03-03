@@ -42,7 +42,6 @@ public class Flock : BaseFlock
         base.Update();
     }
 
-
     protected override void SetComputeShaderInput()
     {
         base.SetComputeShaderInput();
