@@ -63,12 +63,19 @@ void CSMain(uint3 id : SV_DispatchThreadID)
         averageAllignment = (averageAllignment / allingmentLength) * g_Allignment;
     
     cohesion = normalize(cohesion) * g_Cohesion;
-    averageSeperation = normalize(averageSeperation) * g_Seperation;
+    float seperationLength = length(averageSeperation);
+    if (seperationLength > 0)
+    {
+        averageSeperation = (averageSeperation / seperationLength) * g_Seperation;      
+    }
     
     float3 steering = averageAllignment + cohesion + averageSeperation + wander;
     float steeringLength = length(steering);
+    if(steeringLength > 0)
+    {
+        g_Boids[id.x].velocity += steering / steeringLength * g_Acceleration;
+    }
     
-    g_Boids[id.x].velocity += steering / steeringLength * g_Acceleration;
     float speed = length(g_Boids[id.x].velocity);
     if(speed > g_MaxSpeed)
     {
