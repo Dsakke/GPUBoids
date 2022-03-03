@@ -14,38 +14,9 @@ public struct BoidData // this is a struct that should only contain data about b
     public Vector3 velocity;
 }
 
-public class Flock : MonoBehaviour
+public class Flock : BaseFlock
 {
-    readonly private int m_ThreadGroupSize = 1024; // This needs to be hardcoded in the shader so you should make sure this is the same as "threadGroupsSize" in the compute shader
-
-
-    [Header("General settings")]
-    [SerializeField]
-    private ComputeShader m_BoidCompute = null;
-    [Header("Flock Settings")]
-    [SerializeField]
-    private int m_NrBoids = 100;
-    private ComputeBuffer m_BoidBuffer;
-    private BoidData[] m_BoidData;
-    [SerializeField]
-    private float m_WorldSize = 1000.0f;
-    [SerializeField]
-    private float m_NeighborhoodRadius = 20.0f;
-    [Header("Boid Settings")]
-    [SerializeField]
-    private float m_Acceleration = 10.0f;
-    [SerializeField]
-    [Range(0.1f, 20.0f)]
-    private float m_MaxSpeed = 50.0f;
-    [SerializeField]
-    [Range(0.0f, 1.0f)]
-    private float m_Cohesion = 0.158f;
-    [SerializeField]
-    [Range(0.0f, 1.0f)]
-    private float m_Allignment = 0.492f;
-    [SerializeField]
-    [Range(0.0f, 1.0f)]
-    private float m_Seperation = 0.162f;
+    [Header("Wander Settings")]
     [SerializeField]
     [Range(0.0f, 1.0f)]
     private float m_Wander = 0.2f;
@@ -54,19 +25,8 @@ public class Flock : MonoBehaviour
     [SerializeField]
     private float m_WanderCubeDistance = 10.0f;
 
-    // Instanced Draw Arguments
-    [Header("Graphics Settings")]
-    [SerializeField]
-    private Mesh m_BoidMesh = null;
-    [SerializeField]
-    private Material m_Material = null; // Material must be instanced for good performance
-    private uint[] m_Args = new uint[5] { 0, 0, 0, 0, 0 };
-    private ComputeBuffer m_BufferWithArgs = null;
-
-
-
     // Start is called before the first frame update
-    void Start()
+    protected override void Start()
     {
         m_BoidData = new BoidData[m_NrBoids];
         for (int i = 0; i < m_NrBoids; ++i)
@@ -91,44 +51,27 @@ public class Flock : MonoBehaviour
     }
 
     // Update is called once per frame
-    void FixedUpdate()
+    protected override void FixedUpdate()
     {
-        SetComputeShaderInput();
-        int kernelId = m_BoidCompute.FindKernel("CSMain");
-        int threadGroups = Mathf.CeilToInt(m_NrBoids / m_ThreadGroupSize);
-        m_BoidCompute.Dispatch(kernelId, threadGroups + 1, 1, 1);
-        m_BoidBuffer.GetData(m_BoidData);
+        base.FixedUpdate();
     }
 
-    private void Update()
+    protected override void Update()
     {
-        // Render
-        Bounds bounds = new Bounds(Vector3.zero, new Vector3(m_WorldSize * 2, m_WorldSize * 2, m_WorldSize * 2));
-        m_Material.SetBuffer("g_Boids", m_BoidBuffer);
-        Graphics.DrawMeshInstancedIndirect(m_BoidMesh, 0, m_Material, bounds,m_BufferWithArgs);
+        base.Update();
     }
 
 
-    void SetComputeShaderInput()
+    protected override void SetComputeShaderInput()
     {
-        int kernel = m_BoidCompute.FindKernel("CSMain");
-        m_BoidCompute.SetBuffer(kernel, "g_Boids", m_BoidBuffer);
-        m_BoidCompute.SetFloat("g_WorldSize", m_WorldSize);
-        m_BoidCompute.SetFloat("g_NeighborhoodRad", m_NeighborhoodRadius);
-        m_BoidCompute.SetFloat("g_Acceleration", m_Acceleration);
-        m_BoidCompute.SetFloat("g_MaxSpeed", m_MaxSpeed);
-        m_BoidCompute.SetInt("g_NrBoids", m_NrBoids);
-        m_BoidCompute.SetFloat("g_Seperation", m_Seperation);
-        m_BoidCompute.SetFloat("g_Cohesion", m_Cohesion);
-        m_BoidCompute.SetFloat("g_Allignment", m_Allignment);
+        base.SetComputeShaderInput();
         m_BoidCompute.SetFloat("g_Wander", m_Wander);
         m_BoidCompute.SetFloat("g_WanderCubeSize", m_WanderCubeSize);
         m_BoidCompute.SetFloat("g_WanderCubeDistance", m_WanderCubeDistance);
     }
 
-    private void OnDestroy()
+    protected override void OnDestroy()
     {
-        m_BoidBuffer.Dispose();
-        m_BufferWithArgs.Dispose();
+        base.OnDestroy();
     }
 }
