@@ -28,26 +28,7 @@ public class Flock : BaseFlock
     // Start is called before the first frame update
     protected override void Start()
     {
-        m_BoidData = new BoidData[m_NrBoids];
-        for (int i = 0; i < m_NrBoids; ++i)
-        {
-            m_BoidData[i] = new BoidData(new Vector3(Random.Range(-m_WorldSize, m_WorldSize), Random.Range(-m_WorldSize, m_WorldSize), Random.Range(-m_WorldSize, m_WorldSize)));
-            m_BoidData[i].velocity = Vector3.forward;
-        }
-
-        int posVecSize = sizeof(float) * 3;
-        int velocityVecSize = sizeof(float) * 3;
-        int boidSize = posVecSize + velocityVecSize;
-        m_BoidBuffer = new ComputeBuffer(m_NrBoids, boidSize);
-        m_BoidBuffer.SetData(m_BoidData);
-
-        m_BufferWithArgs = new ComputeBuffer(1, sizeof(uint) * 5, ComputeBufferType.IndirectArguments);
-        m_Args[0] = (uint)m_BoidMesh.GetIndexCount(0);
-        m_Args[1] = (uint)m_NrBoids;
-        m_Args[2] = (uint)m_BoidMesh.GetIndexStart(0);
-        m_Args[3] = (uint)m_BoidMesh.GetBaseVertex(0);
-        m_BufferWithArgs.SetData(m_Args);
-
+        base.Start();
     }
 
     // Update is called once per frame
