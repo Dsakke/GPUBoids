@@ -34,3 +34,17 @@ float3 Wander(Boid boid, float wanderCubeSize, float wanderCubeDistance, uint3 i
     return (float3) 0;
 
 }
+
+float3 Seperate(Boid boid, Boid neighbor, float neighborhoodRad)
+{
+    float3 vecFromNeighbor = boid.position - neighbor.position;
+    float dist = length(vecFromNeighbor);
+    return (vecFromNeighbor / dist) * (1 - (dist / neighborhoodRad));
+}
+
+
+// It feels pointless to make this last one a function but for the sake of consitency
+float3 Allign(Boid neighbor)
+{
+    return neighbor.velocity;
+}

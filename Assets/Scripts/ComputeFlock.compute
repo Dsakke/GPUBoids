@@ -41,17 +41,15 @@ void CSMain(uint3 id : SV_DispatchThreadID)
         if (dist < g_NeighborhoodRad) 
         {
             ++nrNeighbors;
-            averageAllignment += g_Boids[idx].velocity;
+            averageAllignment += Allign(g_Boids[idx]);
             averageCohesion += g_Boids[idx].position;
             if(dist != 0.0f)
-                averageSeperation += (vecFromNeighbor / dist) * (1 - (dist / g_NeighborhoodRad));
+                averageSeperation += Seperate(g_Boids[id.x], g_Boids[idx], g_NeighborhoodRad);
         }
     }
 
     // Wander Behaviour
-    
     float3 wander = Wander(g_Boids[id.x], g_WanderCubeSize, g_WanderCubeDistance, id) * g_Wander;
-    
     
     averageAllignment /= nrNeighbors;
     averageCohesion /= nrNeighbors;
