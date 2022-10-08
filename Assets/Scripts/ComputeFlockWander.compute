@@ -48,13 +48,13 @@ void CSMain(uint3 id : SV_DispatchThreadID)
         }
     }
 
-    // Wander Behaviour
-    float3 wander = Wander(g_Boids[id.x], g_WanderCubeSize, g_WanderCubeDistance, id) * g_Wander;
-    
     averageAllignment /= nrNeighbors;
     averageCohesion /= nrNeighbors;
     float3 cohesion = averageCohesion - g_Boids[id.x].position;
     averageSeperation /= nrNeighbors;
+    
+    // Wander Behaviour
+    float3 wander = Wander(g_Boids[id.x], g_WanderCubeSize, g_WanderCubeDistance) * g_Wander;
     
     float allingmentLength = length(averageAllignment);
     if (allingmentLength != 0)
