@@ -3,6 +3,7 @@ I learned about compute shaders and learned they're a good way to offload work f
 
 #### C# 
 The first challenge was learning how to use compute shaders in unity, luckily the code is similar to DirectX with which I already have some experience. The C# side of the project is pretty easy. I made the boids customizable at runtime in the editor. 
+
 ![Editor variables](https://images2.imgbox.com/92/f3/QgEfKi01_o.png "Editor variables")
 
 #### Compute shader
