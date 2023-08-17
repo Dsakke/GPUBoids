@@ -1,8 +1,10 @@
 
-Shader "Instanced/InstancedSurfaceShader" {
+Shader"Instanced/InstancedSurfaceShader" {
     Properties{
         _Glossiness("Smoothness", Range(0,1)) = 0.5
         _Metallic("Metallic", Range(0,1)) = 0.0
+        _BaseColor("BaseColor", Color) = (.5, .5, .5, 1)
+        _WorldSize("WorldSize", Float) = 1000.0
     }
         SubShader{
             Tags { "RenderType" = "Opaque" }
@@ -48,9 +50,15 @@ Shader "Instanced/InstancedSurfaceShader" {
 
             half _Glossiness;
             half _Metallic;
+            half _WorldSize;
+            float4 _BaseColor;
 
             void surf(Input IN, inout SurfaceOutputStandard o) {
-                o.Albedo = float3(1, 1, 1);
+#ifdef UNITY_PROCEDURAL_INSTANCING_ENABLED 
+                o.Albedo = _BaseColor + ((float4(1,1,1,1) - _BaseColor) * abs(g_Boids[unity_InstanceID].position) / _WorldSize);
+#else
+                o.Albedo = float4(1, 1, 1, 1);
+#endif
                 o.Metallic = _Metallic;
                 o.Smoothness = _Glossiness;
                 o.Alpha = 1;
