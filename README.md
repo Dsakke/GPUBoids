@@ -1,3 +1,4 @@
+![Example](https://github.com/Dsakke/Dsakke.github.io/blob/main/images/Boids.gif)
 # GPU Boids
 I learned about compute shaders and learned they're a good way to offload work from your CPU whenever you have a highly parallelizable problem. I decided that making an implementation of boids in compute shaders seems like a good way to learn. I decided on using Unity because they have good support for compute shaders.
 
