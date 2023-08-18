@@ -31,7 +31,7 @@ float3 Wander(Boid boid, float wanderSphereSize, float wanderSphereDistance)
     // into a random point on a sphere. More points can be generated in the edges of the cube causing a higher
     // chance for the boid goes that direction 
     float3 spherePos = normalize(randomNumbers) * wanderSphereSize;
-    float3 desiredPos = spherePos + (forward + wanderSphereDistance) + boid.position;
+    float3 desiredPos = spherePos + (forward * wanderSphereDistance) + boid.position;
     
     return normalize(desiredPos - boid.position);
 }

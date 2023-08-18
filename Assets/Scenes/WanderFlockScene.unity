@@ -259,7 +259,7 @@ MonoBehaviour:
   m_Material: {fileID: 2100000, guid: c4aa26f42bc30a84ab1c5af4e591a934, type: 2}
   m_Wander: 0.2
   m_WanderCubeSize: 15
-  m_WanderCubeDistance: 10
+  m_WanderCubeDistance: 0
 --- !u!4 &713904716
 Transform:
   m_ObjectHideFlags: 0
